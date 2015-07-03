@@ -4,6 +4,8 @@ var send = document.getElementById("sayit-button");
 var subscribedStorage = "SIRPYTHON_PIMPBOT_SUBSCRIBED";
 var pimpedStorage = "SIRPYTHON_PIMPBOT_PIMPED";
 
+sessionStorage.setItem(pimpedStorage, ""); // so I don't get an undefined thing later
+
 /**
 	Returns the last chat message spoken
 */
