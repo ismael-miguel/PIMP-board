@@ -66,9 +66,9 @@ function isSubscribed(username) {
 /**
 	Returns all the subscribed users
 */
-function getSubscribed() {
+function getSubscribedUsers() {
 	var users = [];
-	var subscribed = getPimpedList();
+	var subscribed = getSubscribedList();
 	for(var user in subscribed) {
 		users.push(user);
 	}
@@ -122,15 +122,24 @@ function main() {
 				sendTo("You are not subscribed.", message.user);
 			}
 		} else if(messageParts[0] == "pimp") {
-			var id = messageParts[1];
-			if(id == undefined) {
-				sendTo("You need to provide the ID of your answer.", message.user);
-			}
+			if(isSubscribed(message.user) == true) {
+				var id = messageParts[1];
+				if(id == undefined) {
+					sendTo("You need to provide the ID of your answer.", message.user);
+				}
 
-			if(isPimped(id) == false) {
-				// pimp
+				if(wasPimped(id) == false) {
+					var groupMessage = "";
+					var subscribed = getSubscribedUsers();
+					for(var i = 0; i < subscribed.length; i++) {
+						groupMessage += ("@" + subscribed[i] + " ");
+					}
+					sendMessage(groupMessage + "http://codereview.stackexchange.com/a/" + id);
+				} else {
+					sendTo("That post has already been pimped today.", message.user);
+				}
 			} else {
-				sendTo("You have already pimped that post today.", message.user);
+				sendTo("You must be subscribed to pimp here.", message.user);
 			}
 		}
 	}
