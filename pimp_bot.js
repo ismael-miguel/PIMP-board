@@ -112,11 +112,10 @@ function wasPimped(id) {
 
 function subscribe(message) {
 	if(!isSubscribed(message.user)) {
-			addToSubscribed(message.user);
-			sendTo("You have been successfully subscribed. Subscribed count: " + getSubscribedUsers().length, message.user);
-		} else {
-			sendTo("You are already subscribed.", message.user);
-		}
+		addToSubscribed(message.user);
+		sendTo("You have been successfully subscribed. Subscribed count: " + getSubscribedUsers().length, message.user);
+	} else {
+		sendTo("You are already subscribed.", message.user);
 	}
 }
 function unsubscribe(message) {
