@@ -112,14 +112,14 @@ function main() {
 		if(message.content == "subscribe") {
 			if(isSubscribed(message.user) == false) {
 				addToSubscribed(message.user);
-				sendTo("You have been successfully subscribed.", message.user);
+				sendTo("You have been successfully subscribed. Subscribed count: " + getSubscribedUsers().length, message.user);
 			} else {
 				sendTo("You are already subscribed.", message.user);
 			}
 		} else if(message.content == "unsubscribe") {
 			if(isSubscribed(message.user) == true) {
 				removeFromSubscribed(message.user);
-				sendTo("You have been successfully removed.", message.user);
+				sendTo("You have been successfully removed. Subscribed count: " + getSubscribedUsers().length, message.user);
 			} else {
 				sendTo("You are not subscribed.", message.user);
 			}
