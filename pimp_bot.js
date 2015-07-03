@@ -1,8 +1,10 @@
-var chat = document.getElementById("next");
+var chat = document.getElementById("chat");
 var input = document.getElementById("input");
 var send = document.getElementById("sayit-button");
 var subscribedStorage = "SIRPYTHON_PIMPBOT_SUBSCRIBED";
 var pimpedStorage = "SIRPYTHON_PIMPBOT_PIMPED";
+
+sessionStorage.setItem(pimpedStorage, "{}"); // so I don't get an undefined thing later
 
 /**
 	Returns the last chat message spoken
@@ -10,7 +12,7 @@ var pimpedStorage = "SIRPYTHON_PIMPBOT_PIMPED";
 function getLastMessage() {
 	return {
 		content: chat.lastElementChild.children[1].lastElementChild.children[1].innerHTML,
-		user: chat.lastElementChild.children[0].childnre[2].innerHTML.replace(/ /g,'')
+		user: chat.lastElementChild.children[0].children[2].innerHTML.replace(/ /g,'')
 	};
 }
 
@@ -132,12 +134,16 @@ function main() {
 				}
 
 				if(wasPimped(id) == false) {
+					addToPimped(id);
 					var groupMessage = "";
 					var subscribed = getSubscribedUsers();
 					for(var i = 0; i < subscribed.length; i++) {
 						groupMessage += ("@" + subscribed[i] + " ");
 					}
-					sendMessage(groupMessage + "http://codereview.stackexchange.com/a/" + id);
+					sendMessage(groupMessage);
+					window.setTimeout(function() {
+						sendMessage("http://codereview.stackexchange.com/a/" + id);
+					}, 4000);
 				} else {
 					sendTo("That post has already been pimped today.", message.user);
 				}
@@ -147,5 +153,5 @@ function main() {
 		}
 	}
 
-	window.setTimeout(main, 1000);
+	window.setTimeout(main, 5000);
 }
