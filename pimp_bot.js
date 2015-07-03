@@ -131,6 +131,7 @@ function main() {
 				}
 
 				if(wasPimped(id) == false) {
+					addToPimped(id);
 					var groupMessage = "";
 					var subscribed = getSubscribedUsers();
 					for(var i = 0; i < subscribed.length; i++) {
