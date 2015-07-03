@@ -11,7 +11,7 @@ sessionStorage.setItem(pimpedStorage, "{}"); // so I don't get an undefined thin
 */
 function getLastMessage() {
 	return {
-		content: chat.lastElementChild.children[1].lastElementChild.children[1].innerHTML,
+		content: chat.lastElementChild.getElementsByClassName("content")[0],
 		user: chat.lastElementChild.children[0].children[2].innerHTML.replace(/ /g,'')
 	};
 }
