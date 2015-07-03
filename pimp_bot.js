@@ -154,11 +154,13 @@ function pimp(message) {
 
 function main() {
 	var message = getLastMessage();
+	var commandList = Object.keys(commands);
 
 	if(message.user != "SirAlfred") {
-		for(var i = 0, length = commands.length; i < length; i++) {
-			if(message.content == Object.keys(commands)[i]) {
-				commands[Object.keys(commands)[i]](message);
+		for(var i = 0, length = commandList.length; i < length; i++) {
+			if(message.content == commandList[i]) {
+				commands[commandList[i]](message);
+				commands[commandList[i]](message);
 			}
 		}
 	}
