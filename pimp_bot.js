@@ -126,26 +126,23 @@ function main() {
 		} else if(messageParts[0] == "pimp") {
 			if(isSubscribed(message.user) == true) {
 				var id = messageParts[1];
-				if(id == undefined) {
-					sendTo("You need to provide the ID of your answer.", message.user);
-				}
-				if(isNaN(id)) {
-					sendTo("You need to provide a numerical ID.", message.user);
-				}
-
-				if(wasPimped(id) == false) {
-					addToPimped(id);
-					var groupMessage = "";
-					var subscribed = getSubscribedUsers();
-					for(var i = 0; i < subscribed.length; i++) {
-						groupMessage += ("@" + subscribed[i] + " ");
-					}
-					sendMessage(groupMessage);
-					window.setTimeout(function() {
-						sendMessage("http://codereview.stackexchange.com/a/" + id);
-					}, 4000);
+				if(id == undefined || isNaN(id)) {
+					sendTo("You need to provide the numerical ID of your post.", message.user);
 				} else {
-					sendTo("That post has already been pimped today.", message.user);
+					if(wasPimped(id) == false) {
+						addToPimped(id);
+						var groupMessage = "";
+						var subscribed = getSubscribedUsers();
+						for(var i = 0; i < subscribed.length; i++) {
+							groupMessage += ("@" + subscribed[i] + " ");
+						}
+						sendMessage(groupMessage);
+						window.setTimeout(function() {
+							sendMessage("http://codereview.stackexchange.com/a/" + id);
+						}, 4000);
+					} else {
+						sendTo("That post has already been pimped today.", message.user);
+					}
 				}
 			} else {
 				sendTo("You must be subscribed to pimp here.", message.user);
