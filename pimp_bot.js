@@ -146,5 +146,5 @@ function main() {
 		}
 	}
 
-	window.setTimeout(main, 1000);
+	window.setTimeout(main, 5000);
 }
