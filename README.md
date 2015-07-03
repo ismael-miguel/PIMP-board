@@ -3,8 +3,8 @@ Potential chat room for Code Review. This is a script for a bot that will manage
 
 #Room description
 
-1. Person gives post ID to bot
-2. Bot pings everyone on it's subscriber list with the post
+1. Person gives post ID to bot.
+2. Bot pings everyone on it's subscriber list with the post.
 
 That way, when someone wants to pimp a post, they can reach a larger audience.
 
