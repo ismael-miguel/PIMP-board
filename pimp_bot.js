@@ -6,6 +6,12 @@ var pimpedStorage = "SIRPYTHON_PIMPBOT_PIMPED";
 
 sessionStorage.setItem(pimpedStorage, "{}"); // so I don't get an undefined thing later
 
+var commands = {
+	"subscribe": subscribe,
+	"unsubscribe": unsubscribe,
+	"pimp": pimp
+}
+
 /**
 	Returns the last chat message spoken
 */
@@ -104,51 +110,61 @@ function wasPimped(id) {
 	return getPimpedList()[id] != undefined;
 }
 
+function subscribe(message) {
+	if(!isSubscribed(message.user)) {
+			addToSubscribed(message.user);
+			sendTo("You have been successfully subscribed. Subscribed count: " + getSubscribedUsers().length, message.user);
+		} else {
+			sendTo("You are already subscribed.", message.user);
+		}
+	}
+}
+function unsubscribe(message) {
+	if(isSubscribed(message.user)) {
+		removeFromSubscribed(message.user);
+		sendTo("You have been successfully removed. Subscribed count: " + getSubscribedUsers().length, message.user);
+	} else {
+		sendTo("You are not subscribed.", message.user);
+	}
+}
+function ping(message) {
+	messageParts = message.content.split(" ")
+	if(!isSubscribed(message.user)) {
+		sendTo("You must be subscribed to pimp here.", message.user);
+	} else {
+		var id = messageParts[1];
+
+		if(!id) {
+			sendTo("You need to provide the ID of your answer.", message.user);
+		} else if(wasPimped(id)) {
+			sendTo("That post has already been pimped today.", message.user);
+		} else {
+			addToPimped(id);
+			var groupMessage = "";
+			var subscribed = getSubscribedUsers();
+			for(var i = 0, length = subscribed.length; i < length; i++) {
+				groupMessage += ("@" + subscribed[i] + " ");
+			}
+			sendMessage(groupMessage);
+			window.setTimeout(function() {
+				sendMessage("http://codereview.stackexchange.com/a/" + id);
+			}, 4000); // to prevent the chat from blocking the message due to it being sent too early
+		}
+	}
+}
+
 function main() {
 	var message = getLastMessage();
-	var messageParts = message.content.split(" ");
 
 	if(message.user != "SirAlfred") {
-		if(message.content == "subscribe") {
-			if(isSubscribed(message.user) == false) {
-				addToSubscribed(message.user);
-				sendTo("You have been successfully subscribed. Subscribed count: " + getSubscribedUsers().length, message.user);
-			} else {
-				sendTo("You are already subscribed.", message.user);
-			}
-		} else if(message.content == "unsubscribe") {
-			if(isSubscribed(message.user) == true) {
-				removeFromSubscribed(message.user);
-				sendTo("You have been successfully removed. Subscribed count: " + getSubscribedUsers().length, message.user);
-			} else {
-				sendTo("You are not subscribed.", message.user);
-			}
-		} else if(messageParts[0] == "pimp") {
-			if(isSubscribed(message.user) == true) {
-				var id = messageParts[1];
-				if(id == undefined || isNaN(id)) {
-					sendTo("You need to provide the numerical ID of your post.", message.user);
-				} else {
-					if(wasPimped(id) == false) {
-						addToPimped(id);
-						var groupMessage = "";
-						var subscribed = getSubscribedUsers();
-						for(var i = 0; i < subscribed.length; i++) {
-							groupMessage += ("@" + subscribed[i] + " ");
-						}
-						sendMessage(groupMessage);
-						window.setTimeout(function() {
-							sendMessage("http://codereview.stackexchange.com/a/" + id);
-						}, 4000);
-					} else {
-						sendTo("That post has already been pimped today.", message.user);
-					}
-				}
-			} else {
-				sendTo("You must be subscribed to pimp here.", message.user);
+		for(var i = 0, var length = commands.length; i < length; i++) {
+			if(message.content == Object.keys(commands)[i]) {
+				commands[Object.keys(commands)[i]](message);
 			}
 		}
 	}
 
 	window.setTimeout(main, 5000);
 }
+
+main();
