@@ -160,10 +160,8 @@ function main() {
 	var messageParts = message.content.split(" ");
 
 	if(message.user != "SirAlfred") {
-		for(command in commands) {
-			if(messageParts[0] == command) { // if the first word of the chat message is a command
-				commands[command](message);
-			}
+		if(commands.hasOwnProperty(messageParts[0])) {
+			commands[messageParts[0]](message);
 		}
 	}
 
