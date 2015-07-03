@@ -10,7 +10,7 @@ var pimpedStorage = "SIRPYTHON_PIMPBOT_PIMPED";
 function getLastMessage() {
 	return {
 		content: chat.lastElementChild.children[1].lastElementChild.children[1].innerHTML,
-		user: chat.lastElementChild.children[0].childnre[2].innerHTML.replace(/ /g,'')
+		user: chat.lastElementChild.children[0].children[2].innerHTML.replace(/ /g,'')
 	};
 }
 
