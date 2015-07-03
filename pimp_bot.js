@@ -157,12 +157,12 @@ function pimp(message) {
 
 function main() {
 	var message = getLastMessage();
-	var commandList = Object.keys(commands);
+	var messageParts = message.content.split(" ");
 
 	if(message.user != "SirAlfred") {
-		for(var i = 0, length = commandList.length; i < length; i++) {
-			if(message.content == commandList[i]) {
-				commands[commandList[i]](message);
+		for(command in commands) {
+			if(messageParts[0] == command) { // if the first word of the chat message is a command
+				commands[command](message);
 			}
 		}
 	}
