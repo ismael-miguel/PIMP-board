@@ -137,7 +137,10 @@ function main() {
 					for(var i = 0; i < subscribed.length; i++) {
 						groupMessage += ("@" + subscribed[i] + " ");
 					}
-					sendMessage(groupMessage + "http://codereview.stackexchange.com/a/" + id);
+					sendMessage(groupMessage);
+					window.setTimeout(function() {
+						sendMessage("http://codereview.stackexchange.com/a/" + id);
+					}, 4000);
 				} else {
 					sendTo("That post has already been pimped today.", message.user);
 				}
