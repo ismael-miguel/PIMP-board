@@ -160,7 +160,6 @@ function main() {
 		for(var i = 0, length = commandList.length; i < length; i++) {
 			if(message.content == commandList[i]) {
 				commands[commandList[i]](message);
-				commands[commandList[i]](message);
 			}
 		}
 	}
