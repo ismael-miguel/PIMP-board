@@ -1,6 +1,8 @@
 var chat = document.getElementById("next");
 var input = document.getElementById("input");
 var send = document.getElementById("sayit-button");
+var subscribedStorage = "SIRPYTHON_PIMPBOT_SUBSCRIBED";
+var pimpedStorage = "SIRPYTHON_PIMPBOT_PIMPED";
 
 /**
 	Returns the last chat message spoken
@@ -28,35 +30,76 @@ function sendTo(message, user) {
 }
 // ---------- Subscribed list functions ----------
 /**
+	Returns an object representing the subscribed list from storage
+*/
+function getSubscribedList() {
+	return JSON.parse(localStorage.getItem(subscribedStorage));
+}
+/**
+	Sets an object representing the subscribed list to storage
+*/
+function setSubscribedList(newList) {
+	localStorage.setItem(subscribedStorage, JSON.stringify(newList));
+}
+/**
 	Adds a user to the subscribed list
 */
 function addToSubscribed(username) {
-	localStorage.setItem("SIRPYTHON_PIMPBOT" + username, "subscribed");
+	var subscribed = getSubscribedList();
+	subscribed[username] = true;
+	setSubscribedList(subscribed);
 }
 /**
 	Removes a user from the subscribed list
 */
 function removeFromSubscribed(username) {
-	localStorage.removeItem("SIRPYTHON_PIMPBOT" + username);
+	var subscribed = getSubscribedList();
+	delete subscribed[username];
+	setSubscribedList(subscribed);
 }
 /**
 	Returns if a user is subscribed
 */
 function isSubscribed(username) {
-	return localStorage.getItem("SIRPYTHON_PIMPBOT" + username) == "subscribed";
+	return getSubscribedList()[username] != undefined;
+}
+/**
+	Returns all the subscribed users
+*/
+function getSubscribed() {
+	var users = [];
+	var subscribed = getPimpedList();
+	for(var user in subscribed) {
+		users.push(user);
+	}
+	return users;
 }
 // ---------- Pimped list functions ----------
+/**
+	Returns an object representing the pimped list from storage
+*/
+function getPimpedList() {
+	return JSON.parse(sessionStorage.getItem(pimpedStorage));
+}
+/**
+	Sets an object representing the pimped list to storage
+*/
+function setPimpedList(newList) {
+	sessionStorage.setItem(pimpedStorage, JSON.stringify(newList));
+}
 /**
 	Adds an ID to the pimped list
 */
 function addToPimped(id) {
-	sessionStorage.setItem("SIRPYTHON_PIMPBOT" + id, "pimped");
+	var pimped = getPimpedList()
+	pimped[id] = true;
+	setPimpedList(pimped);
 }
 /**
 	Returns if an ID has been pimped
 */
 function wasPimped(id) {
-	return sessionStorage.getItem("SIRPYTHON_PIMPBOT" + id) == "pimped";
+	return getPimpedList()[id] != undefined;
 }
 
 function main() {
