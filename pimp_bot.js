@@ -1,4 +1,4 @@
-var chat = document.getElementById("next");
+var chat = document.getElementById("chat");
 var input = document.getElementById("input");
 var send = document.getElementById("sayit-button");
 var subscribedStorage = "SIRPYTHON_PIMPBOT_SUBSCRIBED";
