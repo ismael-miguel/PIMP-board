@@ -137,16 +137,19 @@ function pimp(message) {
 			sendTo("You need to provide the ID of your answer.", message.user);
 		} else if(wasPimped(id)) {
 			sendTo("That post has already been pimped today.", message.user);
+		} else if(!messageParts[2]) {
+			sendTo("Please specify q or a.", message.user);
 		} else {
 			addToPimped(id);
 			var groupMessage = "";
 			var subscribed = getSubscribedUsers();
+			var qa = (messageParts[2] == "q" ? "q" : "a")
 			for(var i = 0, length = subscribed.length; i < length; i++) {
 				groupMessage += ("@" + subscribed[i] + " ");
 			}
 			sendMessage(groupMessage);
 			window.setTimeout(function() {
-				sendMessage("http://codereview.stackexchange.com/a/" + id);
+				sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id);
 			}, 4000); // to prevent the chat from blocking the message due to it being sent too early
 		}
 	}
