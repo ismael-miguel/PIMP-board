@@ -127,7 +127,7 @@ function unsubscribe(message) {
 		sendTo("You are not subscribed.", message.user);
 	}
 }
-function ping(message) {
+function pimp(message) {
 	messageParts = message.content.split(" ")
 	if(!isSubscribed(message.user)) {
 		sendTo("You must be subscribed to pimp here.", message.user);
@@ -157,7 +157,7 @@ function main() {
 	var message = getLastMessage();
 
 	if(message.user != "SirAlfred") {
-		for(var i = 0, var length = commands.length; i < length; i++) {
+		for(var i = 0, length = commands.length; i < length; i++) {
 			if(message.content == Object.keys(commands)[i]) {
 				commands[Object.keys(commands)[i]](message);
 			}
