@@ -127,6 +127,9 @@ function main() {
 				if(id == undefined) {
 					sendTo("You need to provide the ID of your answer.", message.user);
 				}
+				if(isNaN(id)) {
+					sendTo("You need to provide a numerical ID.", message.user);
+				}
 
 				if(wasPimped(id) == false) {
 					var groupMessage = "";
