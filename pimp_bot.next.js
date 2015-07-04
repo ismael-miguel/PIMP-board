@@ -8,7 +8,7 @@
 		var bannedStorage = "SIRPYTHON_PIMPBOT_BANNED";
 		var subscribed = localStorage.getItem(subscribedStorage) || '';
 		var pimped = localStorage.getItem(pimpedStorage) || '';
-		var banned = localStorage.getItem(pimpedStorage) || '';
+		var banned = localStorage.getItem(bannedStorage) || '';
 		
 		if(!subscribed) {
 			localStorage.setItem(bannedStorage, "{}");
