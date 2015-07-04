@@ -77,6 +77,42 @@
 				}, 4000); // to prevent the chat from blocking the message due to it being sent too early
 			}
 		},*/
+		"pimp": function(user, args) {
+			var qa = args[0];
+			var id = args[1];
+			var tags = [];
+			var message;
+
+			for(var i = 2, length = args.length; i < length; i++) {
+				if(args[i][0] != '"') { // if we are not on the message part yet (the first character of the message part is a ")
+					tags.push(args[i]);
+				}
+			}
+
+			message = args[i] ? args[i] : "";
+
+			if( ( qa != "q" || qa != "a" ) ||
+				( !id ) ||
+				( !tags)
+				) {
+				commands["help"](user, "pimp");
+			} else {
+				addToPimped(id);
+				var groupMessage = "";
+
+				var subscribed = getSubscribedUsers(tags, user);
+				for(var i = 0, length = subscribed.length; i < length; i++) {
+					groupMessage += ("@" + subscribed[i] + " ");
+				}
+
+				groupMessage += (message ? "\r\n" + message : '');
+
+				sendMessage(groupMessage);
+				window.setTimeout(function() {
+					sendMessage("http://codereview.stackexchange.com/" + qa + "/" + messageParts[2]);
+				}, 4000); // to prevent the chat from blocking the message due to it being sent too early
+			}
+		},
 		"tags": function(user) {
 			if(subscribed.hasOwnProperty(user)) {
 				if(isEmpty(subscribed[user])) {
@@ -243,7 +279,7 @@
 				if( !tags.length || subscribed[user] === true ) {
 					users.push(user);
 				} else {
-					tags = tags.split(" ");
+					//tags = tags.split(" ");
 					for(var tag in tags) {
 						if( subscribed[user].hasOwnProperty(tag) ) {
 							users.push(user);
