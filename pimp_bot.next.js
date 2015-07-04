@@ -95,7 +95,7 @@
 				( !id ) ||
 				( !tags)
 				) {
-				commands["help"](user, "pimp");
+				commands["help"](user, ["pimp"]);
 			} else {
 				addToPimped(id);
 				var groupMessage = "";
