@@ -260,7 +260,6 @@
 		Removes a user from the subscribed list
 	*/
 	function removeFromSubscribed(username) {
-		var subscribed = getSubscribedList();
 		delete subscribed[username];
 		subscribed._length--;
 		setSubscribedList(subscribed);
@@ -290,8 +289,6 @@
 				}
 			}
 		}
-		return users;
-	}
 		return users;
 	}
 	// ---------- Pimped list functions ----------
