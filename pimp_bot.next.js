@@ -168,6 +168,16 @@
 				sendTo("Banned: " + bans, user);
 			}
 		},
+		"all": function(user, args) {
+			if( isSU(user) && args[0] ) {
+				var groupMessage = "";
+				var users = getSubscribedList();
+				for(var user in users) {
+					groupMessage += ("@" + user + " ");
+				}
+				sendMessage(groupMessage + args[0]);
+			}
+		},
 		//-------------
 		"help": function(user, args) {
 			var topics = {
