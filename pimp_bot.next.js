@@ -91,7 +91,7 @@
 
 			message = args[i] ? args[i] : "";
 
-			if( ( qa != "q" || qa != "a" ) ||
+			if( ( qa != "q" && qa != "a" ) ||
 				( !id ) ||
 				( !tags)
 				) {
