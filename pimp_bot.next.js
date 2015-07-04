@@ -108,8 +108,8 @@
 				}
 
 				groupMessage += (message ? "\r\n" + message : '');
-
 				sendMessage(groupMessage);
+
 				window.setTimeout(function() {
 					sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id);
 				}, 4000); // to prevent the chat from blocking the message due to it being sent too early
@@ -277,7 +277,7 @@
 		var users = [];
 		for(var user in subscribed) {
 			if( user != '_length' && subscribed.hasOwnProperty(user) && ignore != user ) {
-				if( !tags.length || isEmpty(subscribed[user]) ) {
+				if( !tags.length || isEmpty(subscribed[user]) ) { // Are we sure we want the || !tags.length part? This could become abusive if people pimp without including tags
 					users.push(user);
 				} else {
 					for(var tag in tags) {
