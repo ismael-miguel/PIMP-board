@@ -81,33 +81,28 @@
 			var qa = args[0];
 			var id = args[1];
 			var tags = [];
-			var message;
+			var message = "";
 
 			for(var i = 2, length = args.length; i < length; i++) {
 				if(args[i][0] != '"') { // if we are not on the message part yet (the first character of the message part is a ")
 					tags.push(args[i]);
+				} else {
+					message = args[i];
 				}
 			}
 
-			message = args[i] ? args[i] : "";
-
-			if( ( qa != "q" && qa != "a" ) ||
-				( !id ) ||
-				( !tags)
-				) {
+			if( !/^[qa]$/.test(qa) || !id ) {
 				commands["help"](user, ["pimp"]);
 			} else {
 				addToPimped(id);
 				var groupMessage = "";
 
-				var subscribed = getSubscribedUsers(tags, user);
-				console.log("subscribed: " + subscribed);
-				for(var i = 0, length = subscribed.length; i < length; i++) {
-					console.log(subscribed[i]);
-					groupMessage += ("@" + subscribed[i] + " ");
+				var users = getSubscribedUsers(tags, user);
+				for(var i = 0, length = users.length; i < length; i++) {
+					groupMessage += "@" + users[i] + " ";
 				}
 
-				groupMessage += (message ? "\r\n" + message : '');
+				groupMessage += (message ? "\r\n" + message : "");
 				sendMessage(groupMessage);
 
 				window.setTimeout(function() {
@@ -132,6 +127,9 @@
 				sendTo("You need to be subscribed to view the tag list. Write `help subscribe` for more info.", user);
 			}
 		},
+		"hello": function(user){//ignore arguments
+			sendTo("Hello ", user);
+		},
 		"help": function(user, args) {
 			var topics = {
 				"":[
@@ -140,7 +138,8 @@
 					"- `pimp` - Pimps a post by pinging subscribed users",
 					"- `subscribe` - Subscribes you to a list of tags or all",
 					"- `unsubscribe` - Unsubscribes you from a list of tags or all",
-					"- `tags` - Lists the subscribed tags"
+					"- `tags` - Lists the subscribed tags",
+					"- `hello` - Simply says 'Hello' to you"
 				],
 				"help": [
 					"`help` is used to obtain help about a command",
@@ -167,7 +166,8 @@
 					"The `pimp` command has the following format:",
 					"`pimp q|a <id> <optional tag list> <\"Optional message\">`",
 					"Example: `pimp a 012345`, `pimp q 012345 sql \"Question 12345\"`"
-				]
+				],
+				"hello": "Simply says 'Hello', to check functionality."
 			};
 			
 			if( args.length && !topics.hasOwnProperty(args[0]) ) {
@@ -221,7 +221,7 @@
 		setTimeout(function(){
 			input.value = message;
 			send.click();
-		},1000);
+		},3000);
 	}
 	/**
 		Sends a message @ a user
@@ -277,11 +277,12 @@
 		var users = [];
 		for(var user in subscribed) {
 			if( user != '_length' && subscribed.hasOwnProperty(user) && ignore != user ) {
-				if( !tags.length || isEmpty(subscribed[user]) ) { // Are we sure we want the || !tags.length part? This could become abusive if people pimp without including tags
+				// Are we sure we want the || !tags.length part? This could become abusive if people pimp without including tags
+				if( !tags.length || isEmpty(subscribed[user]) ) {
 					users.push(user);
 				} else {
-					for(var tag in tags) {
-						if( subscribed[user].hasOwnProperty(tag) ) {
+					for(var i = 0, length = tags.length; i < length; i++) {
+						if( subscribed[user].hasOwnProperty(tags[i]) ) {
 							users.push(user);
 							break;
 						}
