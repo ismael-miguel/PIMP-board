@@ -99,43 +99,50 @@
 	/**
 		Returns an object representing the subscribed list from storage
 	*/
-	function getSubscribedList() {
-		return JSON.parse(localStorage.getItem(subscribedStorage));
+	function getSubscribedMemory() {
+		return subscribed;
 	}
 	/**
-		Sets an object representing the subscribed list to storage
+		Writes an object representing the subscribed list to storage
 	*/
-	function setSubscribedList(newList) {
-		localStorage.setItem(subscribedStorage, JSON.stringify(newList));
+	function setSubscribedMemory(newList) {
+		window.setTimeout(function() {
+			localStorage.setItem(subscribedStorage, JSON.stringify(newList));
+		}, 1); // writing to memory is slow and we don't want to stall the program
 	}
 	/**
 		Adds a user to the subscribed list
 	*/
-	function addToSubscribed(username) {
-		var subscribed = getSubscribedList();
-		subscribed[username] = true;
-		setSubscribedList(subscribed);
+	function addToSubscribed(username, tags) {
+		subscribed[username] = tags;
+		setSubscribedMemory(subscribed);
 	}
 	/**
 		Removes a user from the subscribed list
 	*/
 	function removeFromSubscribed(username) {
-		var subscribed = getSubscribedList();
 		delete subscribed[username];
-		setSubscribedList(subscribed);
+		setSubscribedMemory(subscribed);
 	}
 	/**
-		Returns if a user is subscribed
+		Returns if a user is subscribed to any of the tags supplied
 	*/
-	function isSubscribed(username) {
-		return getSubscribedList().hasOwnProperty(username);
+	function isSubscribed(username, tags) {
+		if(subscribed.hasOwnProperty(username)) {
+			for(var i = 0, length = subscribed[username]; i < length; i++) {
+				if(tags[i] in subscribed[username]) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	/**
 		Returns all the subscribed users
 	*/
 	function getSubscribedUsers(tags, ignore) {
 		var users = [];
-		var subscribed = getSubscribedList();
+		var subscribed = getSubscribedMemory();
 		for(var user in subscribed) {
 			if( subscribed.hasOwnProperty(user) && ignore != user ) {
 				if( !tags.length || subscribed[user] === true ) {
