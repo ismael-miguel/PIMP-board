@@ -277,11 +277,10 @@
 	function getSubscribedUsers(tags, ignore) {
 		var users = [];
 		for(var user in subscribed) {
-			if( subscribed.hasOwnProperty(user) && ignore != user ) {
-				if( !tags.length || subscribed[user] === true ) {
+			if( user != '_length' && subscribed.hasOwnProperty(user) && ignore != user ) {
+				if( !tags.length || isEmpty(subscribed[user]) ) {
 					users.push(user);
 				} else {
-					//tags = tags.split(" ");
 					for(var tag in tags) {
 						if( subscribed[user].hasOwnProperty(tag) ) {
 							users.push(user);
@@ -291,6 +290,8 @@
 				}
 			}
 		}
+		return users;
+	}
 		return users;
 	}
 	// ---------- Pimped list functions ----------
