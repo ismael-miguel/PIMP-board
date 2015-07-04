@@ -27,6 +27,7 @@
 					addToSubscribed(user);
 				}
 				for(var i = 0, length = args.length; i < args.length; i++) {
+					args[i] = args[i].toLowerCase();
 					subscribed[user][args[i]] = 1;
 				}
 				setSubscribedList(subscribed);
@@ -42,6 +43,7 @@
 					sendTo("You have been successfully unsubscribed. Currently subscribed users: " + subscribed._length, user);
 				} else {
 					for(var i = 0, length = args.length; i < length; i++) {
+						args[i] = args[i].toLowerCase();
 						delete subscribed[user][args[i]];
 					}
 					setSubscribedList(subscribed);
@@ -85,7 +87,7 @@
 
 			for(var i = 2, length = args.length; i < length; i++) {
 				if(args[i][0] != '"') { // if we are not on the message part yet (the first character of the message part is a ")
-					tags.push(args[i]);
+					tags.push(args[i].toLowerCase()); //tags don't have casing
 				} else {
 					message = args[i];
 				}
@@ -324,7 +326,7 @@
 	function main() {
 		var message = getLastMessage();
 		if( message.content && commands.hasOwnProperty(message.content.split(" ")[0]) ) {
-			var args = message.content.match(/("([^"]*|\\")*"$|\b\d+|\b\w[\w\d\-]*)/g);
+			var args = message.content.match(/("([^"]*|\\")*"$|\b\d+|\b\w[\w\d\-.#+]*)/g);
 
 			if(message.user != "SirAlfred" && args) {
 				if(commands.hasOwnProperty(args[0])) {
