@@ -101,7 +101,9 @@
 				var groupMessage = "";
 
 				var subscribed = getSubscribedUsers(tags, user);
+				console.log("subscribed: " + subscribed);
 				for(var i = 0, length = subscribed.length; i < length; i++) {
+					console.log(subscribed[i]);
 					groupMessage += ("@" + subscribed[i] + " ");
 				}
 
@@ -109,7 +111,7 @@
 
 				sendMessage(groupMessage);
 				window.setTimeout(function() {
-					sendMessage("http://codereview.stackexchange.com/" + qa + "/" + messageParts[2]);
+					sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id);
 				}, 4000); // to prevent the chat from blocking the message due to it being sent too early
 			}
 		},
