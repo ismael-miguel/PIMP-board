@@ -36,10 +36,15 @@
 			if(subscribed.hasOwnProperty(user) && !args.length) {
 				sendTo("You are already subscribed.", user);
 			} else {
+				var i = 0;
 				if(!subscribed.hasOwnProperty(user)) {
+					var id = args[0];
+					i = 1; // if the user is subscribing for the first time, we don't want to search for tags at index 0
+					
 					addToSubscribed(user);
+					subscribed[user][id] = id;
 				}
-				for(var i = 0, length = args.length; i < args.length; i++) {
+				for(length = args.length; i < args.length; i++) {
 					args[i] = args[i].toLowerCase();
 					subscribed[user][args[i]] = 1;
 				}
@@ -102,7 +107,7 @@
 							sendMessage(groupMessage);
 	
 							window.setTimeout(function() {
-								sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id);
+								sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id + "/" subscribed[user][id]);
 							
 								//currently, answers don't show the tag list.
 								window.setTimeout(function() {
@@ -228,6 +233,7 @@
 					"`subscribe` allows you to be pinged when a question or answer is `pimp`ed.",
 					"You can pass a list of tags, separated by space, that you want to be subscribed to.",
 					"If you don't pass any parameter, you are subscribed to all tags"
+					"Syntax: subscribe <codereview_id> <optional list of tags>"
 				],
 				"unsubscribe": [
 					"`unsubscribe` removes you from the list to be pinged when a question or answer is `pimp`ed.",
@@ -239,13 +245,7 @@
 				"tags": [
 					"`tags` lists all the tags you're subscribed to.",
 					"All the tags will have a nice link to visit it."
-				]/*,
-				"pimp": [
-					"`pimp` is used to send a notification",
-					"The `pimp` command has the following format:",
-					"`pimp q|a <id> <optional tag list> <\"Optional message\">`",
-					"Example: `pimp a 012345`, `pimp q 012345 sql \"Question 12345\"`"
-				]*/,
+				],
 				"pimp": [
 					"`pimp` is used to send a notification",
 					"The `pimp` command has the following format:",
