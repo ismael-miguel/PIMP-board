@@ -11,16 +11,22 @@
 	var banned = localStorage.getItem(bannedStorage) || '';
 	
 	if(!subscribed) {
-		localStorage.setItem(bannedStorage, "{}");
-		localStorage.setItem(pimpedStorage, "{\"_length\":0}");
 		localStorage.setItem(subscribedStorage, "{\"_length\":0}");
-		pimped = {_length:0};
 		subscribed = {_length:0};
+	} else {
+		subscribed = JSON.parse(subscribed);
+	}
+	if(!pimped) {
+		localStorage.setItem(pimpedStorage, "{\"_length\":0}");
+		pimped = {_length:0};
+	} else {
+		pimped = JSON.parse(pimped);
+	}
+	if(!banned) {
+		localStorage.setItem(bannedStorage, "{}");
 		banned = {};
 	} else {
 		banned = JSON.parse(banned);
-		pimped = JSON.parse(pimped);
-		subscribed = JSON.parse(subscribed);
 	}
 
 	var commands = {
@@ -83,7 +89,7 @@
 					sendMessage("http://codereview.stackexchange.com/" + qa + "/" + messageParts[2]);
 				}, 4000); // to prevent the chat from blocking the message due to it being sent too early
 			}
-		},*/
+		},*//*
 		"pimp": function(user, args) {
 			var qa = args[0];
 			var id = args[1];
@@ -116,6 +122,68 @@
 					sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id);
 				}, 4000); // to prevent the chat from blocking the message due to it being sent too early
 			}
+		},*/
+		"pimp": function(user, args) {
+			var qa = args[0];
+			var id = args[1];
+			var message = args[2] && args[2][0] == '"' ? args[2] : "";
+
+			if( args.length > 3 ) {
+				
+				sendTo("**Warning**: The tag list isn't required anymore! Please, remove it next time!", user);
+				
+				//Just fetch the message from the end, if tag are passed
+				message = args[args.length-1][0] == '"' ? args[args.length-1] : "";
+				
+			}
+
+			if( !/^[qa]$/.test(qa) || !id ) {
+				commands["help"](user, ["pimp"]);
+			} else {
+				
+				var xhr=new XMLHttpRequest();
+				
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState == 4 && xhr.status == 200) {
+						var data = JSON.parse(xhr.responseText);
+						
+						addToPimped(id);
+						var groupMessage = "";
+
+						var users = getSubscribedUsers(data.items[0].tags, user);
+						for(var i = 0, length = users.length; i < length; i++) {
+							groupMessage += "@" + users[i] + " ";
+						}
+
+						groupMessage += (message ? "\r\n" + message : "");
+						
+						sendMessage(groupMessage);
+
+						window.setTimeout(function() {
+							sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id);
+						
+							//currently, answers don't show the tag list.
+							window.setTimeout(function() {
+								if( qa == 'a' ) {
+									sendMessage("[tag:" + data.items[0].tags.join("] [tag:") + "]");
+								}
+							}, 2000);
+							
+						}, 4000); // to prevent the chat from blocking the message due to it being sent too early
+					} else if(xhr.readyState==4) {
+						sendTo("An error occurred when loading the tags to the id " + id, user);
+					}
+				}
+				switch( qa ) {
+					case 'q':
+						xhr.open("GET","https://api.stackexchange.com/2.2/questions/" + id + "?order=desc&sort=activity&site=codereview&filter=!Frv9SENgPho8ZP2n*gFopr8oO-",true);
+						break;
+					case 'a':
+						xhr.open("GET","https://api.stackexchange.com/2.2/answers/" + id + "?order=desc&sort=activity&site=codereview&filter=!Fcazzsr2b3L9VFDprzwqyqL-af",true);
+						break;
+				}
+				xhr.send();
+			}
 		},
 		"tags": function(user) {
 			if(subscribed.hasOwnProperty(user)) {
@@ -140,8 +208,13 @@
 		//undocumented!
 		"ban": function(user, args){
 			if( isSU(user) ) {
+				var reason = '';
+				if(args[args.length-1][0] == '"') {
+					reason = args.pop();
+				}
+				
 				for(var i = 0, length = args.length; i < length; i++ ) {
-					banned[args[i]] = 1;
+					banned[args[i]] = reason;
 					removeFromSubscribed(args[i]);
 				}
 				sendTo("New bans: " + args, user);
@@ -158,24 +231,36 @@
 			}
 		},
 		"banned": function(user){
-			if(isEmpty(bans)) {
+			if(isEmpty(banned)) {
 				sendTo("So far, no user had been banned", user);
 			} else {
 				var bans = "";
-				for(var user in banned) {
-					bans += " " + user;
+				for(var ban in banned) {
+					if(banned.hasOwnProperty(ban)) {
+						bans += " " + ban + (banned[ban] ? " (*" + banned[ban] + "*)" : "" ) ;
+					}
 				}
 				sendTo("Banned: " + bans, user);
 			}
 		},
-		"all": function(user, args) {
-			if( isSU(user) && args[0] ) {
-				var groupMessage = "";
-				var users = getSubscribedList();
-				for(var user in users) {
-					groupMessage += ("@" + user + " ");
+		"all": function(user, args){
+			if( args.length && isSU(user)) {
+				var users = "";
+				for(var name in subscribed) {
+					if(name != "_length" && subscribed.hasOwnProperty(name) && name != user) {
+						users += "@" + name + " ";
+					}
 				}
-				sendMessage(groupMessage + args[0]);
+				sendMessage(users + "\r\nMessage from " + user + ": " + args[0]);
+			}
+		},
+		"kill": function(user, args){
+			if(isSU(user)) {
+				clearInterval(interval);
+				sendMessage("*Bot*: Goodbye cruel world!" + (args[0] ? "\r\nMy last words: " + args[0] : ""));
+				setBannedList(banned);
+				setPimpedList(pimped);
+				setSubscribedList(subscribed);
 			}
 		},
 		//-------------
@@ -205,23 +290,31 @@
 					"`unsubscribe` removes you from the list to be pinged when a question or answer is `pimp`ed.",
 					"You can pass a list of tags, separated by space, that you want to be unsubscribed of.",
 					"If you unsubscribe all your tags, by providing a list, you'll **subscribe** to all tags",
+					"*Passing a list of tags won't have any effect when subscribed to all tags!*",
 					"To unsubscribe entirelly, write `unsubscribe` without arguments"
 				],
 				"tags": [
 					"`tags` lists all the tags you're subscribed to.",
 					"All the tags will have a nice link to visit it."
-				],
+				]/*,
 				"pimp": [
 					"`pimp` is used to send a notification",
 					"The `pimp` command has the following format:",
 					"`pimp q|a <id> <optional tag list> <\"Optional message\">`",
 					"Example: `pimp a 012345`, `pimp q 012345 sql \"Question 12345\"`"
+				]*/,
+				"pimp": [
+					"`pimp` is used to send a notification",
+					"The `pimp` command has the following format:",
+					"`pimp q|a <id> <\"Optional message\">`",
+					"Example: `pimp a 012345`, `pimp q 012345 \"Question 12345\"`",
+					"Notice: The tag list was removed! It is now fetched automatically."
 				],
 				"hello": "Simply says 'Hello', to check functionality.",
 				"banned": [
 					"Lists all banned users.",
 					"Only IsmaelMiguel, SirPython and SirAlfred (maybe some mods in the future) can change users.",
-					"You will be unsubscribed sutomatically when banned."
+					"You will be unsubscribed automatically when banned."
 				]
 			};
 			
@@ -394,18 +487,69 @@
 			var args = message.content.match(/("([^"]*|\\")*"$|\b\d+|\b\w[\w\d\-.#+]*)/g);
 
 			if( banned.hasOwnProperty(message.user) ) {
-			sendTo("**You have been banned and can't use the bot anymore**", message.user);
+				sendTo("**You have been banned and can't use the bot anymore!**" + ( banned[message.user] ? " Reason: " + banned[message.user] : "" ), message.user);
 			} else if(message.user != "SirAlfred" && args) {
 				if(commands.hasOwnProperty(args[0])) {
 					commands[args.shift()](message.user, args || []);
 				}
 			}
 		}
-
-		window.setTimeout(main, 5000);
 	}
 
 	main();
-
+	var interval = setInterval(main, 5000);
+	
+	sendMessage("*Bot*: Greetings. If you need any help on how to use me, write `help` in a message.");
+	
+	//exposes BOT API, in case someone blocks the messages
+	window.BOT = {
+		"kill": function() {
+			if( arguments[0] ) {
+				commands.kill('SirAlfred', ['"' + arguments[0] + '"']);
+			} else {
+				commands.kill('SirAlfred');
+			}
+		},
+		"ressurect": function() {
+			sendMessage("*Bot*: I'm back from the dead! If you need any help on how to use me, write `help` in a message.");
+			interval = setInterval(main, 5000);
+		},
+		"ban": function() {
+			var args = Array.prototype.slice.call(arguments);
+			commands.ban('SirAlfred', args);
+		},
+		"banned": function() {
+			commands.banned('SirAlfred');
+		},
+		"unban": function() {
+			var args = Array.prototype.slice.call(arguments);
+			commands.unban('SirAlfred', args);
+		},
+		"all": function() {
+			var args = Array.prototype.slice.call(arguments);
+			commands.all('SirAlfred', args);
+		},
+		"getSubscribed": function() {
+			return subscribed;
+		},
+		"getPumped": function() {
+			return pumped;
+		},
+		"getBanned": function() {
+			return banned;
+		},
+		"subscribe": function() {
+			var args = Array.prototype.slice.call(arguments);
+			commands.subscribe(args.shift(),args);
+		},
+		"unsubscribe": function() {
+			var args = Array.prototype.slice.call(arguments);
+			commands.unsubscribe(args.shift(),args);
+		},
+		"tags": function() {
+			var args = Array.prototype.slice.call(arguments);
+			commands.unsubscribe(args.shift(),args);
+		}
+	};
 
 })(Function('return this')());
