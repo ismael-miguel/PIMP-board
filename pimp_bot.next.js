@@ -42,15 +42,14 @@
 						// if the user is subscribing for the first time, we don't want to search for tags at index 0
 						i = 1;
 
-						addToSubscribed(user);
-						subscribed[user][id] = args[0];
+						addToSubscribed(user, args[0]);
 					} else {
-						commands["help"]("subscribe");
+						commands.help("subscribe");
+						return;
 					}
 				}
 				for(var length = args.length; i < args.length; i++) {
-					args[i] = args[i].toLowerCase();
-					subscribed[user][args[i]] = 1;
+					subscribed[user].tags[args[i].toLowerCase()] = 1;
 				}
 				setSubscribedList(subscribed);
 				sendTo("You have been successfully subscribed. Currently subscribed users: " + subscribed._length, user);
@@ -88,7 +87,7 @@
 			}
 
 			if( !/^[qa]$/.test(qa) || !id ) {
-				commands["help"](user, ["pimp"]);
+				commands.help(user, ["pimp"]);
 			} else {
 				
 				var xhr = new XMLHttpRequest();
@@ -111,7 +110,7 @@
 							sendMessage(groupMessage);
 	
 							window.setTimeout(function() {
-								sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id + "/" + subscribed[user][id]);
+								sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id + "/" + subscribed[user].id);
 							
 								//currently, answers don't show the tag list.
 								window.setTimeout(function() {
@@ -139,12 +138,12 @@
 		},
 		"tags": function(user) {
 			if(subscribed.hasOwnProperty(user)) {
-				if(isEmpty(subscribed[user])) {
+				if(isEmpty(subscribed[user].tags)) {
 					sendTo("Currently, you are subscribed to all tags.", user);
 				} else {
 					var markdown = "Subscribed tags: ";
 					for(var tag in subscribed[user]) {
-						if(subscribed[user].hasOwnProperty(tag)) {
+						if(subscribed[user].tags.hasOwnProperty(tag)) {
 							markdown += " [tag:" + tag + "]";
 						}
 					}
@@ -155,7 +154,7 @@
 			}
 		},
 		"hello": function(user){//ignore arguments
-			sendTo("Hello ", user);
+			sendMessage("Hello @" + user);
 		},
 		//undocumented!
 		"ban": function(user, args){
@@ -220,41 +219,42 @@
 			var topics = {
 				"":[
 					"Commands:",
-					"- `help` - Displays this help or help to a command",
-					"- `pimp` - Pimps a post by pinging subscribed users",
-					"- `subscribe` - Subscribes you to a list of tags or all",
-					"- `unsubscribe` - Unsubscribes you from a list of tags or all",
-					"- `tags` - Lists the subscribed tags",
-					"- `hello` - Simply says 'Hello' to you",
-					"- `banned` - List banned users"
+					"- help - Displays this help or help to a command",
+					"- pimp - Pimps a post by pinging subscribed users",
+					"- subscribe - Subscribes you to a list of tags or all",
+					"- unsubscribe - Unsubscribes you from a list of tags or all",
+					"- tags - Lists the subscribed tags",
+					"- hello - Simply says 'Hello' to you",
+					"- banned - List banned users"
 				],
 				"help": [
-					"`help` is used to obtain help about a command",
+					"'help' is used to obtain help about a command",
 					"You can pass any command name as the single parameter",
-					"Try writting `help pimp`",
+					"Try writting 'help pimp'",
 				],
 				"subscribe": [
-					"`subscribe` allows you to be pinged when a question or answer is `pimp`ed.",
+					"'subscribe' allows you to be pinged when a question or answer is pimped.",
+					"The CodeReview ID is required to subscribe for the first time only.",
 					"You can pass a list of tags, separated by space, that you want to be subscribed to.",
-					"If you don't pass any parameter, you are subscribed to all tags",
+					"If you don't pass any tag, you are subscribed to all tags.",
 					"Syntax: subscribe <codereview_id> <optional list of tags>"
 				],
 				"unsubscribe": [
-					"`unsubscribe` removes you from the list to be pinged when a question or answer is `pimp`ed.",
+					"'unsubscribe' removes you from the list to be pinged when a question or answer is pimped.",
 					"You can pass a list of tags, separated by space, that you want to be unsubscribed of.",
-					"If you unsubscribe all your tags, by providing a list, you'll **subscribe** to all tags",
-					"*Passing a list of tags won't have any effect when subscribed to all tags!*",
-					"To unsubscribe entirelly, write `unsubscribe` without arguments"
+					"If you unsubscribe all your tags, by providing a list, you'll subscribe to all tags",
+					"Passing a list of tags won't have any effect when subscribed to all tags!",
+					"To unsubscribe entirelly, write 'unsubscribe' without arguments"
 				],
 				"tags": [
-					"`tags` lists all the tags you're subscribed to.",
+					"'tags' lists all the tags you're subscribed to.",
 					"All the tags will have a nice link to visit it."
 				],
 				"pimp": [
-					"`pimp` is used to send a notification",
-					"The `pimp` command has the following format:",
-					"`pimp q|a <id> <\"Optional message\">`",
-					"Example: `pimp a 012345`, `pimp q 012345 \"Question 12345\"`",
+					"'pimp' is used to send a notification",
+					"The 'pimp' command has the following format:",
+					"Syntax: pimp q|a <id> <\"Optional message\">",
+					"Example: pimp a 012345, pimp q 012345 \"Question 12345\"",
 					"Notice: The tag list was removed! It is now fetched automatically."
 				],
 				"hello": "Simply says 'Hello', to check functionality.",
@@ -346,8 +346,8 @@
 	/**
 		Adds a user to the subscribed list
 	*/
-	function addToSubscribed(user) {
-		subscribed[user] = {};
+	function addToSubscribed(user,id) {
+		subscribed[user] = {id:id,tags:{}};
 		subscribed._length++;
 		setSubscribedList(subscribed);
 	}
@@ -377,7 +377,7 @@
 					users.push(user);
 				} else {
 					for(var i = 0, length = tags.length; i < length; i++) {
-						if( subscribed[user].hasOwnProperty(tags[i]) ) {
+						if( subscribed[user].tags.hasOwnProperty(tags[i]) ) {
 							users.push(user);
 							break;
 						}
@@ -498,7 +498,7 @@
 		},
 		"tags": function() {
 			var args = Array.prototype.slice.call(arguments);
-			commands.unsubscribe(args.shift(),args);
+			commands.tags(args.shift(),args);
 		}
 	};
 
