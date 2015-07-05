@@ -32,27 +32,48 @@
 	}
 
 	var commands = {
-		"subscribe": function (user, args) {
-			if(subscribed.hasOwnProperty(user) && !args.length) {
-				sendTo("You are already subscribed.", user);
+		"subscribe": function (user, args, message) {
+			if(subscribed.hasOwnProperty(user)) {
+				if(!args.length) {
+					sendTo("You are already subscribed.", user);
+				} else {
+					for(var i = 0, length = args.length; i < args.length; i++) {
+						subscribed[user].tags[args[i].toLowerCase()] = 1;
+					}
+					setSubscribedList(subscribed);
+					sendTo("Your tag list has been updated.", user);
+				}
 			} else {
-				var i = 0;
-				if(!subscribed.hasOwnProperty(user)) {
-					if(/^\d+$/.test(args[0])) {
-						// if the user is subscribing for the first time, we don't want to search for tags at index 0
-						i = 1;
-
-						addToSubscribed(user, args[0]);
-					} else {
-						commands.help("subscribe");
-						return;
+				var xhr = new XMLHttpRequest();
+				
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState == 4) {
+						if(xhr.status == 200) {
+							var data = JSON.parse(xhr.responseText);
+							
+							if( !data.items || !data.items[0] || !data.items[0].user_id ) {
+								sendTo("**Error**: Couldn't retrieve your CodeReview ID", user);
+								return;
+							}
+							
+							addToSubscribed(user, data.items[0].user_id);
+							
+							//adds the tags to the user
+							if(args.length) {
+								for(var i = 0, length = args.length; i < args.length; i++) {
+									subscribed[user].tags[args[i].toLowerCase()] = 1;
+								}
+								setSubscribedList(subscribed);
+							}
+							
+							sendTo("You have been successfully subscribed. Currently subscribed users: " + subscribed._length, user);
+						} else {
+							sendTo("**Error**: A connection error occurred when obtaining your CodeReview ID", user);
+						}
 					}
 				}
-				for(var length = args.length; i < args.length; i++) {
-					subscribed[user].tags[args[i].toLowerCase()] = 1;
-				}
-				setSubscribedList(subscribed);
-				sendTo("You have been successfully subscribed. Currently subscribed users: " + subscribed._length, user);
+				xhr.open("GET","https://api.stackexchange.com/2.2/users?order=desc&sort=reputation&inname=" + message.screen_name + "&site=codereview&filter=!23Iboz-DGS7YIn8vj3fNI",true);
+				xhr.send();
 			}
 		},
 		"unsubscribe": function (user, args) {
@@ -88,6 +109,8 @@
 
 			if( !/^[qa]$/.test(qa) || !id ) {
 				commands.help(user, ["pimp"]);
+			} else if(!subscribed[user]) {
+				sendTo("**Warning**: You must be `subscribed` before you can `pimp`.", user);
 			} else {
 				
 				var xhr = new XMLHttpRequest();
@@ -96,6 +119,11 @@
 					if (xhr.readyState == 4) {
 						if(xhr.status == 200) {
 							var data = JSON.parse(xhr.responseText);
+							
+							if( !data.items || !data.items[0] || !data.items[0].tags || !data.items[0].tags.length) {
+								sendTo("**Error**: Couldn't retrieve the tags to the " + ( qa == "q" ? "question" : "answer" ) + " with id `" + id + "`. Try `pimp " + ( qa == "q" ? "a" : "q" ) + " " + id + "`", user);
+								return;
+							}
 							
 							addToPimped(id);
 							var groupMessage = "";
@@ -113,15 +141,15 @@
 								sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id + "/" + subscribed[user].id);
 							
 								//currently, answers don't show the tag list.
-								window.setTimeout(function() {
-									if( qa == 'a' ) {
+								if( qa == 'a' ) {
+									window.setTimeout(function() {
 										sendMessage("[tag:" + data.items[0].tags.join("] [tag:") + "]");
-									}
-								}, 2000);
+									}, 2000);
+								}
 								
 							}, 4000); // to prevent the chat from blocking the message due to it being sent too early
 						} else {
-							sendTo("An error occurred when loading the tags to the id " + id, user);
+							sendTo("**Error**: A connection error occurred when loading the tags to the id " + id, user);
 						}
 					}
 				}
@@ -234,10 +262,9 @@
 				],
 				"subscribe": [
 					"'subscribe' allows you to be pinged when a question or answer is pimped.",
-					"The CodeReview ID is required to subscribe for the first time only.",
 					"You can pass a list of tags, separated by space, that you want to be subscribed to.",
 					"If you don't pass any tag, you are subscribed to all tags.",
-					"Syntax: subscribe <codereview_id> <optional list of tags>"
+					"Syntax: subscribe <optional list of tags>"
 				],
 				"unsubscribe": [
 					"'unsubscribe' removes you from the list to be pinged when a question or answer is pimped.",
@@ -290,22 +317,27 @@
 		Returns the last chat message spoken
 	*/
 	function getLastMessage() {
-		var message = chat.lastElementChild;
-		if(message.id=="silence-note") {
-			message = message.previousSibling;
-		}
 		try {
-			return {
-				content: message.children[1].lastElementChild.children[1].innerHTML,
-				user: message.children[0].children[2].innerHTML.replace(/ /g,'')
-			};
+			var messages = chat.querySelector(".user-container:last-child");
+			var user = messages.querySelector(".signature .username");
+			var content = messages.querySelector(".message:last-child .content");
+			
+			if( content.getAttribute("data-checked") !== "1" ) {
+				content.setAttribute("data-checked", "1");
+				var result = {
+					content: content.innerHTML,
+					user: user.innerHTML.replace(/ /g,""),
+					screen_name: user.innerHTML
+				};
+				console.log(result);
+				return result;
+			} else {
+				return {content: "", user: ""};
+			}
+		} catch(e) {
+			return {content: "", user: ""};
 		}
-		catch(e){
-			return {
-				content: "",
-				user: ""
-			};
-		}
+		
 	}
 
 	// ---------- Chat functions ----------
@@ -437,7 +469,7 @@
 				sendTo("**You have been banned and can't use the bot anymore!**" + ( banned[message.user] ? " Reason: " + banned[message.user] : "" ), message.user);
 			} else if(message.user != "SirAlfred" && args) {
 				if(commands.hasOwnProperty(args[0])) {
-					commands[args.shift()](message.user, args || []);
+					commands[args.shift()](message.user, args || [], message);
 				}
 			}
 		}
