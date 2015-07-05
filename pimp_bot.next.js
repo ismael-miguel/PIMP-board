@@ -62,67 +62,6 @@
 				}
 			}
 		},
-		/*"pimp": function (message) {
-			var messageParts = message.content.match(/^pimp ([qa]) ([1-9]\d*)(?: ((?:\w[\w\d\-]+(?: |$))*)(?:"([^"]+)")?)?$/);
-			var id = messageParts ? messageParts[2] : false;
-			
-			if( !messageParts ) {
-				sendTo("",message.user);
-			} else if(!isSubscribed(message.user)) {
-				sendTo("You must be subscribed to pimp here.", message.user);
-			} else if(wasPimped(messageParts[2])) {
-				sendTo("That post has already been pimped today.", message.user);
-			} else {
-				addToPimped(messageParts[2]);
-				var groupMessage = "";
-				//users 
-				var subscribed = getSubscribedUsers(messageParts[3] || '', message.user);
-				var qa = (messageParts[1] == "q" ? "q" : "a")
-				for(var i = 0, length = subscribed.length; i < length; i++) {
-					groupMessage += ("@" + subscribed[i] + " ");
-				}
-				
-				groupMessage += (messageParts[4] ? "\r\n" + messageParts[4] : '');
-				
-				sendMessage(groupMessage);
-				window.setTimeout(function() {
-					sendMessage("http://codereview.stackexchange.com/" + qa + "/" + messageParts[2]);
-				}, 4000); // to prevent the chat from blocking the message due to it being sent too early
-			}
-		},*//*
-		"pimp": function(user, args) {
-			var qa = args[0];
-			var id = args[1];
-			var tags = [];
-			var message = "";
-
-			for(var i = 2, length = args.length; i < length; i++) {
-				if(args[i][0] != '"') { // if we are not on the message part yet (the first character of the message part is a ")
-					tags.push(args[i].toLowerCase()); //tags don't have casing
-				} else {
-					message = args[i];
-				}
-			}
-
-			if( !/^[qa]$/.test(qa) || !id ) {
-				commands["help"](user, ["pimp"]);
-			} else {
-				addToPimped(id);
-				var groupMessage = "";
-
-				var users = getSubscribedUsers(tags, user);
-				for(var i = 0, length = users.length; i < length; i++) {
-					groupMessage += "@" + users[i] + " ";
-				}
-
-				groupMessage += (message ? "\r\n" + message : "");
-				sendMessage(groupMessage);
-
-				window.setTimeout(function() {
-					sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id);
-				}, 4000); // to prevent the chat from blocking the message due to it being sent too early
-			}
-		},*/
 		"pimp": function(user, args) {
 			var qa = args[0];
 			var id = args[1];
@@ -141,7 +80,7 @@
 				commands["help"](user, ["pimp"]);
 			} else {
 				
-				var xhr = (window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"));
+				var xhr = new XMLHttpRequest();
 				
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState == 4) {
