@@ -107,7 +107,7 @@
 							sendMessage(groupMessage);
 	
 							window.setTimeout(function() {
-								sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id + "/" subscribed[user][id]);
+								sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id + "/" + subscribed[user][id]);
 							
 								//currently, answers don't show the tag list.
 								window.setTimeout(function() {
