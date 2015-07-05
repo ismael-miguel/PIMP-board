@@ -141,37 +141,39 @@
 				commands["help"](user, ["pimp"]);
 			} else {
 				
-				var xhr=new XMLHttpRequest();
+				var xhr = (window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"));
 				
 				xhr.onreadystatechange = function() {
-					if (xhr.readyState == 4 && xhr.status == 200) {
-						var data = JSON.parse(xhr.responseText);
-						
-						addToPimped(id);
-						var groupMessage = "";
-
-						var users = getSubscribedUsers(data.items[0].tags, user);
-						for(var i = 0, length = users.length; i < length; i++) {
-							groupMessage += "@" + users[i] + " ";
-						}
-
-						groupMessage += (message ? "\r\n" + message : "");
-						
-						sendMessage(groupMessage);
-
-						window.setTimeout(function() {
-							sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id);
-						
-							//currently, answers don't show the tag list.
-							window.setTimeout(function() {
-								if( qa == 'a' ) {
-									sendMessage("[tag:" + data.items[0].tags.join("] [tag:") + "]");
-								}
-							}, 2000);
+					if (xhr.readyState == 4) {
+						if(xhr.status == 200) {
+							var data = JSON.parse(xhr.responseText);
 							
-						}, 4000); // to prevent the chat from blocking the message due to it being sent too early
-					} else if(xhr.readyState==4) {
-						sendTo("An error occurred when loading the tags to the id " + id, user);
+							addToPimped(id);
+							var groupMessage = "";
+	
+							var users = getSubscribedUsers(data.items[0].tags, user);
+							for(var i = 0, length = users.length; i < length; i++) {
+								groupMessage += "@" + users[i] + " ";
+							}
+	
+							groupMessage += (message ? "\r\n" + message : "");
+							
+							sendMessage(groupMessage);
+	
+							window.setTimeout(function() {
+								sendMessage("http://codereview.stackexchange.com/" + qa + "/" + id);
+							
+								//currently, answers don't show the tag list.
+								window.setTimeout(function() {
+									if( qa == 'a' ) {
+										sendMessage("[tag:" + data.items[0].tags.join("] [tag:") + "]");
+									}
+								}, 2000);
+								
+							}, 4000); // to prevent the chat from blocking the message due to it being sent too early
+						} else {
+							sendTo("An error occurred when loading the tags to the id " + id, user);
+						}
 					}
 				}
 				switch( qa ) {
