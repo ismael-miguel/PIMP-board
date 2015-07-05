@@ -38,11 +38,15 @@
 			} else {
 				var i = 0;
 				if(!subscribed.hasOwnProperty(user)) {
-					var id = args[0];
-					i = 1; // if the user is subscribing for the first time, we don't want to search for tags at index 0
-					
-					addToSubscribed(user);
-					subscribed[user][id] = id;
+					if(/^\d+$/.test(args[0])) {
+						// if the user is subscribing for the first time, we don't want to search for tags at index 0
+						i = 1;
+
+						addToSubscribed(user);
+						subscribed[user][id] = args[0];
+					} else {
+						commands["help"]("subscribe");
+					}
 				}
 				for(var length = args.length; i < args.length; i++) {
 					args[i] = args[i].toLowerCase();
