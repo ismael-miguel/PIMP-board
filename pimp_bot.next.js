@@ -232,7 +232,7 @@
 				"subscribe": [
 					"`subscribe` allows you to be pinged when a question or answer is `pimp`ed.",
 					"You can pass a list of tags, separated by space, that you want to be subscribed to.",
-					"If you don't pass any parameter, you are subscribed to all tags"
+					"If you don't pass any parameter, you are subscribed to all tags",
 					"Syntax: subscribe <codereview_id> <optional list of tags>"
 				],
 				"unsubscribe": [
