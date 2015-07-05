@@ -44,7 +44,7 @@
 					addToSubscribed(user);
 					subscribed[user][id] = id;
 				}
-				for(length = args.length; i < args.length; i++) {
+				for(var length = args.length; i < args.length; i++) {
 					args[i] = args[i].toLowerCase();
 					subscribed[user][args[i]] = 1;
 				}
