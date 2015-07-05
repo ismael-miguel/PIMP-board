@@ -10,10 +10,7 @@
 	var pimped = localStorage.getItem(pimpedStorage) || '';
 	var banned = localStorage.getItem(bannedStorage) || '';
 
-	var specialDays = {
-		"25/12": "Merry Christmas",
-		"1/1": "Happy new year"
-	}
+	var FRIDAY = 5;
 	
 	if(!subscribed) {
 		localStorage.setItem(subscribedStorage, "{\"_length\":0}");
@@ -445,9 +442,8 @@
 	main(); // is this necessary? It will be called in 5 seconds anyway?
 	var interval = setInterval(main, 5000); // what if the function hangs up and takes a while? These threads will build up
 
-	var d = new Date();
-	var dm = d.getDate() + "/" + (d.getMonth() + 1); // I have a +1 on getMonth because getMonth returns 0 based.
-	var greeting = (specialDays[dm] ? speicalDays[dm] + ", CRitters!" : "Greetings.");
+	var isFriday = new Date().getDay() == FRIDAY;
+	var greeting = (isFriday ? "Happy Friday, CRitters!" : "Greetings.");
 	
 	sendMessage("*Bot*: " + greeting + " If you need any help on how to use me, write `help` in a message.");
 	
