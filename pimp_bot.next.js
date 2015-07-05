@@ -534,8 +534,8 @@
 		"getSubscribed": function() {
 			return subscribed;
 		},
-		"getPumped": function() {
-			return pumped;
+		"getPimped": function() {
+			return pimped;
 		},
 		"getBanned": function() {
 			return banned;
