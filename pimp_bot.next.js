@@ -19,8 +19,8 @@
 		subscribed = JSON.parse(subscribed);
 	}
 	if(!pimped) {
-		localStorage.setItem(pimpedStorage, "{\"_length\":0}");
-		pimped = {_length:0};
+		localStorage.setItem(pimpedStorage, "{}");
+		pimped = {};
 	} else {
 		pimped = JSON.parse(pimped);
 	}
@@ -97,6 +97,7 @@
 			var qa = args[0];
 			var id = args[1];
 			var message = args[2] && args[2][0] == '"' ? args[2] : "";
+			var today_date = today();
 
 			if( args.length > 3 ) {
 				
@@ -111,6 +112,8 @@
 				commands.help(user, ["pimp"]);
 			} else if(!subscribed[user]) {
 				sendTo("**Warning**: You must be `subscribed` before you can `pimp`.", user);
+			}  else if(pimped[id] && pimped[id].when === today_date) {
+				sendTo("**Warning**: This has already been `pimp`ed today (UTC time) by " + pimped[id].who, user);
 			} else {
 				
 				var xhr = new XMLHttpRequest();
@@ -121,11 +124,10 @@
 							var data = JSON.parse(xhr.responseText);
 							
 							if( !data.items || !data.items[0] || !data.items[0].tags || !data.items[0].tags.length) {
-								sendTo("**Error**: Couldn't retrieve the tags to the " + ( qa == "q" ? "question" : "answer" ) + " with id `" + id + "`. Try `pimp " + ( qa == "q" ? "a" : "q" ) + " " + id + "`", user);
-								return;
+								return sendTo("**Error**: Couldn't retrieve the tags to the " + ( qa == "q" ? "question" : "answer" ) + " with id `" + id + "`. Try `pimp " + ( qa == "q" ? "a" : "q" ) + " " + id + "`", user);
 							}
 							
-							addToPimped(id);
+							addToPimped(id, today_date, user);
 							var groupMessage = "";
 	
 							var users = getSubscribedUsers(data.items[0].tags, user);
@@ -435,9 +437,8 @@
 	/**
 		Adds an ID to the pimped list
 	*/
-	function addToPimped(id) {
-		var pimped = getPimpedList()
-		pimped[id] = true;
+	function addToPimped(id, when, who) {
+		pimped[id] = {when:when, who:who};
 		setPimpedList(pimped);
 	}
 	/**
@@ -457,6 +458,13 @@
 	*/
 	function isSU(user) {
 		return /^IsmaelMiguel|Sir(?:Python|Alfred)$/.test(user);
+	}
+	/**
+		Returns the current day, in UTC time
+	*/
+	function today(user) {
+		var now = new Date();
+		return now.getUTCFullYear() + "/" + (now.getUTCMonth() + 1) + "/" + now.getUTCDate();
 	}
 	
 
