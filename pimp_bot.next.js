@@ -169,7 +169,7 @@
 				if(isEmpty(subscribed[user].tags)) {
 					sendTo("Currently, you are subscribed to all tags.", user);
 				} else {
-					var markdown = "Subscribed tags: ";
+					var markdown = "Subscribed tags:";
 					for(var tag in subscribed[user].tags) {
 						if(subscribed[user].tags.hasOwnProperty(tag)) {
 							markdown += " [tag:" + tag + "]";
