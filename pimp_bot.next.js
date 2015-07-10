@@ -1,14 +1,15 @@
 (function(window, undefined){
 
 	var chat = document.getElementById("chat");
-	var input = document.getElementById("input");
-	var send = document.getElementById("sayit-button");
+	//var input = document.getElementById("input");
+	//var send = document.getElementById("sayit-button");
 	var subscribedStorage = "SIRPYTHON_PIMPBOT_SUBSCRIBED";
 	var pimpedStorage = "SIRPYTHON_PIMPBOT_PIMPED";
 	var bannedStorage = "SIRPYTHON_PIMPBOT_BANNED";
 	var subscribed = localStorage.getItem(subscribedStorage) || '';
 	var pimped = localStorage.getItem(pimpedStorage) || '';
 	var banned = localStorage.getItem(bannedStorage) || '';
+	var messages = [];
 
 	var FRIDAY = 5;
 	
@@ -347,10 +348,12 @@
 		Sends a message to chat
 	*/
 	function sendMessage(message) {
-		setTimeout(function(){
+		/*setTimeout(function(){
 			input.value = message;
 			send.click();
-		},3000);
+		},3000);*/
+		//pushes the message to the end of the queue
+		messages.push(message);
 	}
 	/**
 		Sends a message @ a user
@@ -491,6 +494,45 @@
 	
 	sendMessage("*Bot*: " + greeting + " If you need any help on how to use me, write `help` in a message.");
 	
+	
+	// - Message queue
+	var roomID = window.location.href.match(/\/rooms\/(\d+)\//)[1];
+	setTimeout(function(){
+		if (messages.length) {
+			var msg = messages.shift();
+			
+			if (msg) {
+				//Must be re-created, or InvalidStatus Exceptions will flood
+				var msgXHR = new XMLHttpRequest();
+				
+				oldMSG = msg;
+				
+				msgXHR.open("POST", "/chats/" + roomID + "/messages/new", true);
+				msgXHR.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				
+				msgXHR.onreadystatechange = function() {
+					if (msgXHR.readyState == 4) {
+						if(msgXHR.status == 200) {
+							console.log("Message sent: '" + msg + "'");
+						} else if (msgXHR.status == 409) {
+							messages.unshift(msg);
+							console.log("Error 409 on: '" + msg + "', attempting re-send");
+						} else {
+							console.log("Error " + msgXHR.status + " on: '" + msg + "'");
+						}
+					}
+				};
+				//text=<text content>&fkey=<room-specific, from `fkey().fkey`>
+				msgXHR.send("text=" + encodeURIComponent(msg) + "&fkey=" + fkey().fkey );
+			}
+		}
+		
+		//arguments.callee == this function
+		setTimeout(arguments.callee, 3000);
+	}, 3000);
+	// - Message queue end
+	
+	
 	//exposes BOT API, in case someone blocks the messages
 	window.BOT = {
 		"kill": function() {
@@ -541,5 +583,7 @@
 			commands.tags(args.shift(),args);
 		}
 	};
+	
+	
 
 })(Function('return this')());
